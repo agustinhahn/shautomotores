@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: shautomotores_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secretpassword}
+      POSTGRES_DB: ${DB_NAME:-shautomotores_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sh_network
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shautomotores_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=5000
+    ports:
+      - "${BACK_PORT:-50001}:5000"
+    volumes:
+      - ./backend/uploads:/app/uploads # Volumes compartidos para imágenes
+    networks:
+      - sh_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:50001/api}
+    container_name: shautomotores_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${FRONT_PORT:-51001}:80"
+    networks:
+      - sh_network
+
+networks:
+  sh_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2C3E50;
+  --color-secondary: #BDC3C7;
+  --color-accent: #C0A080;
+  --color-dark: #1A252F;
+  --color-light: #F4F7F6;
+  --color-surface: #ffffff;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  
+  /* Additional semantic colors if needed */
+  --color-text-main: #2C3E50;
+  --color-text-muted: #64748b;
+
+  /* Custom Animations */
+  --animate-fade-in-up: fadeInUp 0.8s ease-out forwards;
+  --animate-gradient: gradient 8s linear infinite;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+}
+
+body {
+  @apply bg-light text-dark font-sans antialiased;
+}
+
+/* SweetAlert2 Custom Dark Theme */
+.swal2-container {
+  z-index: 9999 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(4px);
+}
+
+.swal2-popup {
+  background-color: #1F2937 !important; /* gray-800 */
+  border: 1px solid #374151 !important; /* gray-700 */
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+  color: #F3F4F6 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  width: auto !important;
+  min-width: 320px !important;
+  max-width: 500px !important;
+}
+
+.swal2-title {
+  color: #FFFFFF !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+}
+
+.swal2-html-container {
+  color: #9CA3AF !important; /* gray-400 */
+  font-size: 1rem !important;
+  margin: 0 0 1.5rem 0 !important;
+}
+
+.swal2-actions {
+  gap: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.swal2-confirm {
+  background-color: #C0A080 !important; /* accent */
+  color: #1A252F !important; /* dark */
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  border: none !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s !important;
+}
+
+.swal2-confirm:hover {
+  background-color: #D4B490 !important;
+  transform: translateY(-1px) !important;
+}
+
+.swal2-confirm:active {
+  transform: translateY(0) !important;
+}
+
+.swal2-cancel {
+  background-color: transparent !important;
+  color: #9CA3AF !important;
+  border: 1px solid #4B5563 !important; /* gray-600 */
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+}
+
+.swal2-cancel:hover {
+  background-color: #374151 !important; /* gray-700 */
+  color: #FFFFFF !important;
+  border-color: #6B7280 !important;
+}
+
+/* Icon Customization */
+.swal2-icon {
+  margin-bottom: 1.5rem !important;
+  border-width: 2px !important;
+}
+
+.swal2-icon.swal2-warning {
+  border-color: #FCD34D !important;
+  color: #FCD34D !important;
+}
+
+.swal2-icon.swal2-error {
+  border-color: #EF4444 !important;
+  color: #EF4444 !important;
+}
+
+.swal2-icon.swal2-success {
+  border-color: #10B981 !important;
+  color: #10B981 !important;
+}
+
+.swal2-icon.swal2-question {
+  border-color: #60A5FA !important;
+  color: #60A5FA !important;
+}
+
+/* SweetAlert2 Input & Select Customization */
+.swal2-input, .swal2-select {
+  background-color: #374151 !important; /* gray-700 */
+  color: #F3F4F6 !important; /* gray-100 */
+  border: 1px solid #4B5563 !important; /* gray-600 */
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem !important;
+  width: 80% !important; /* Default swal width is usually constrained, 80-100% works best */
+  max-width: 100% !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s !important;
+  margin: 1rem auto !important;
+}
+
+.swal2-input:focus, .swal2-select:focus {
+  border-color: #C0A080 !important; /* accent */
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(192, 160, 128, 0.2) !important;
+}
+
+/* Ensure options have dark background too */
+.swal2-select option {
+  background-color: #1F2937 !important; /* gray-800 */
+  color: #F3F4F6 !important;
+  padding: 8px !important;
+}
+
+/* Animation Utilities */
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.bg-300\% { background-size: 300% 300%; }

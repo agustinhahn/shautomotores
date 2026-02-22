@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <rect width="400" height="100" fill="transparent"/>
+  <text x="50" y="70" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="#FACC15">SH</text>
+  <text x="140" y="70" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#FFFFFF">AUTOMOTORES</text>
+  <path d="M10 80 Q 200 100 390 80" stroke="#FACC15" stroke-width="5" fill="none"/>
+</svg>
