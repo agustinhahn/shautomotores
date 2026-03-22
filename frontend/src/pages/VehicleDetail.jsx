@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import vehicleService from '../services/vehicleService';
-import { ArrowLeft, MessageCircle, Calendar, Gauge, DollarSign, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Calendar, Gauge, DollarSign, CheckCircle, FileText } from 'lucide-react';
 import ContactModal from '../components/ContactModal';
 
 const VehicleDetail = () => {
@@ -55,6 +55,15 @@ const VehicleDetail = () => {
 
     const handleWhatsAppClick = () => {
         setShowContactModal(true);
+    };
+
+    const formatSaleType = (type) => {
+        const types = {
+            'direct': 'Venta Directa',
+            'savings_plan': 'Plan de Ahorro',
+            'consignment': 'Consignación'
+        };
+        return types[type] || type;
     };
 
     if (loading) {
@@ -124,10 +133,10 @@ const VehicleDetail = () => {
                 <div className="space-y-8">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-extrabold mb-3 tracking-tight text-primary">{vehicle.brand} <span className="text-accent">{vehicle.model}</span></h1>
-                        <div className="flex flex-wrap gap-4 text-gray-500 text-sm md:text-base font-medium">
-                            <span className="flex items-center gap-1.5"><Calendar size={18} className="text-secondary" /> {vehicle.year}</span>
-                            <span className="flex items-center gap-1.5"><Gauge size={18} className="text-secondary" /> {Number(vehicle.mileage).toLocaleString()} km</span>
-                            <span className="flex items-center gap-1.5 capitalize"><CheckCircle size={18} className="text-secondary" /> {vehicle.condition === 'new' ? 'Nuevo' : 'Usado'}</span>
+                        <div className="flex flex-wrap gap-5 text-gray-600 text-base md:text-lg font-bold">
+                            <span className="flex items-center gap-2"><Calendar size={20} className="text-secondary" /> {vehicle.year}</span>
+                            <span className="flex items-center gap-2"><Gauge size={20} className="text-secondary" /> {Number(vehicle.mileage).toLocaleString()} km</span>
+                            <span className="flex items-center gap-2 capitalize"><CheckCircle size={20} className="text-secondary" /> {vehicle.condition === 'new' ? 'Nuevo' : 'Usado'}</span>
                         </div>
                     </div>
 
@@ -137,43 +146,13 @@ const VehicleDetail = () => {
                              <span className="text-5xl font-bold text-primary font-mono tracking-tight">{vehicle.currency} {Number(vehicle.price).toLocaleString()}</span>
                         </div>
                         {vehicle.sale_type && (
-                            <div className="mt-4 inline-block px-4 py-1.5 bg-light text-primary rounded-full text-xs font-bold border border-secondary/30 capitalize">
-                                {vehicle.sale_type.replace(/_/g, ' ')}
+                            <div className="mt-4 inline-block px-4 py-1.5 bg-light text-primary rounded-full text-xs font-bold border border-secondary/30 uppercase tracking-wider">
+                                {formatSaleType(vehicle.sale_type)}
                             </div>
                         )}
                     </div>
 
                     {/* Dynamic Pricing Info */}
-                    {vehicle.sale_type === 'financed' && vehicle.pricing_details && (
-                        <div className="bg-surface p-8 rounded-3xl border border-secondary/20 shadow-lg shadow-primary/5 space-y-6">
-                            <h3 className="text-xl font-bold text-primary flex items-center gap-2"><DollarSign className="text-accent" /> Detalles de Financiación</h3>
-                            
-                            {vehicle.pricing_details.down_payment && (
-                                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                                    <span className="text-gray-600 font-medium">Entrega Inicial</span>
-                                    <span className="font-bold text-primary text-xl">${Number(vehicle.pricing_details.down_payment).toLocaleString()}</span>
-                                </div>
-                            )}
-
-                            {vehicle.pricing_details.installments && (
-                                <div className="space-y-3 pt-2">
-                                    <p className="text-sm text-secondary font-bold uppercase">Plan de Cuotas</p>
-                                    {Object.entries(vehicle.pricing_details.installments).map(([months, data]) => (
-                                        data.amount && (
-                                            <div key={months} className="flex justify-between items-center text-sm p-3 bg-light rounded-xl border border-secondary/10">
-                                                <div>
-                                                    <span className="text-gray-700 font-medium block">{months} cuotas {data.label && <span className="text-gray-400 font-normal">({data.label})</span>}</span>
-                                                    {data.down_payment && <span className="text-xs text-gray-500">Entrega: ${Number(data.down_payment).toLocaleString()}</span>}
-                                                </div>
-                                                <span className="font-bold text-accent text-lg">${Number(data.amount).toLocaleString()}</span>
-                                            </div>
-                                        )
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
                     {vehicle.sale_type && vehicle.sale_type.startsWith('savings') && vehicle.pricing_details?.savings_plan && (
                         <div className="bg-surface p-8 rounded-3xl border border-secondary/20 shadow-lg shadow-primary/5 space-y-6">
                             <h3 className="text-xl font-bold text-primary flex items-center gap-2"><DollarSign className="text-accent" /> Plan de Ahorro</h3>
@@ -190,6 +169,37 @@ const VehicleDetail = () => {
                         </div>
                     )}
 
+                    {/* Custom Financing Info */}
+                    {vehicle.pricing_details?.custom_financing_features && vehicle.pricing_details.custom_financing_features.length > 0 && (
+                        <div className="bg-surface p-8 rounded-3xl border border-secondary/20 shadow-lg shadow-primary/5 space-y-6">
+                             <h3 className="text-xl font-bold text-primary flex items-center gap-2"><DollarSign className="text-accent" /> Financiación y Tasas</h3>
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                 {vehicle.pricing_details.custom_financing_features.map((feature, index) => (
+                                     feature.label && feature.value && (
+                                         <div key={index} className="bg-light p-4 rounded-xl border border-secondary/20 flex flex-col justify-center">
+                                             <p className="text-xs text-secondary uppercase mb-1 font-bold">{feature.label}</p>
+                                             <p className="font-bold text-accent text-lg">{feature.value}</p>
+                                         </div>
+                                     )
+                                 ))}
+                             </div>
+                        </div>
+                    )}
+
+                    {/* Ficha Técnica Download Btn */}
+                    {vehicle.technical_sheet_url && (
+                        <div className="pt-2">
+                             <a 
+                                href={`${API_BASE}${vehicle.technical_sheet_url}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="w-full bg-light border-2 border-primary text-primary text-lg font-bold py-4 rounded-xl hover:bg-primary hover:text-white transition flex items-center justify-center gap-3 shadow-md"
+                             >
+                                 <FileText size={24} /> Ver Ficha Técnica
+                             </a>
+                        </div>
+                    )}
+
                     {/* Description */}
                     <div>
                          <h3 className="text-xl font-bold text-primary mb-4">Descripción del Vehículo</h3>
@@ -203,7 +213,7 @@ const VehicleDetail = () => {
                     {/* Call to Action */}
                     <div className="pt-6">
                         <button onClick={handleWhatsAppClick} className="w-full bg-[#25D366] text-white text-lg font-bold py-4 rounded-xl hover:bg-[#20bd5a] transition flex items-center justify-center gap-3 shadow-xl shadow-green-500/20 transform hover:-translate-y-1">
-                            <MessageCircle size={26} /> Consultar Vendedor
+                            <MessageCircle size={26} /> Me interesa
                         </button>
                     </div>
                 </div>

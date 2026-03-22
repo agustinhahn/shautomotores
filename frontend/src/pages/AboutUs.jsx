@@ -72,7 +72,7 @@ const AboutUs = () => {
                         </div>
                         <h2 className="text-2xl font-bold text-primary mb-4">Nuestra Misión</h2>
                         <p className="text-gray-600 leading-relaxed">
-                            Brindar soluciones de movilidad confiables y accesibles, priorizando la satisfacción del cliente a través de un asesoramiento honesto y transparente. Nos esforzamos por construir relaciones duraderas basadas en la confianza y la calidad de nuestros servicios.
+                            Nuestra misión es ser el nexo estratégico definitivo entre las necesidades de movilidad y las mejores soluciones del mercado automotriz. Nos especializamos en captar, filtrar y derivar cada consulta hacia un asesoramiento experto y honesto, garantizando que el usuario reciba una respuesta inmediata y de calidad. Nos esforzamos por optimizar el proceso de compra, construyendo una red de confianza donde la tecnología y el factor humano se unen para facilitar el acceso a vehículos 0km y usados en todo el país.
                         </p>
                      </div>
 
@@ -83,9 +83,63 @@ const AboutUs = () => {
                         </div>
                         <h2 className="text-2xl font-bold text-primary mb-4">Nuestra Visión</h2>
                         <p className="text-gray-600 leading-relaxed">
-                            Ser la concesionaria referente en la región, reconocida por nuestra integridad, innovación y excelencia en la atención. Aspiramos a liderar el mercado ofreciendo una experiencia de compra única y adaptada a las necesidades de cada cliente.
+                            Nuestra visión es consolidarnos como la plataforma líder en generación y gestión de contactos del sector automotriz, donde nuestra labor principal es que cada consulta digital se transforme en una venta concreta. Queremos llevar este modelo de gestión más lejos, asegurando que cada cliente sea derivado con los mejores asesores comerciales para garantizar una experiencia altamente satisfactoria y referida. Apostamos a la eficiencia máxima: que ningún lead quede sin respuesta y que cada respuesta sea una oportunidad de negocio cerrada.
                         </p>
                      </div>
+                </div>
+
+                {/* Tu tiempo vale section */}
+                <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 md:p-12 shadow-2xl border border-secondary/20 relative overflow-hidden group">
+                     {/* Decorative elements */}
+                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/10 transition-colors duration-500"></div>
+                     <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+                     
+                     <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-sm uppercase tracking-wider mb-6">
+                            Tu tiempo vale
+                        </div>
+                        
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-6">
+                            Encontrá tu próximo vehículo <span className="text-accent relative inline-block">sin presiones.<span className="absolute bottom-0 left-0 w-full h-1 bg-accent/30 rounded-full"></span></span>
+                        </h2>
+                        
+                        <div className="space-y-6 text-gray-700 leading-relaxed md:text-lg">
+                            <p>
+                                En <strong>SH Automotores</strong>, sabemos que comprar un vehículo es una de las decisiones más importantes de tu economía. Por eso, hemos creado un ecosistema digital diseñado para que vos tengas el control total, eliminando el estrés de recorrer concesionaria por concesionaria y la presión de vendedores que solo buscan cerrar una operación en el momento.
+                            </p>
+                            
+                            <p>
+                                Nuestra plataforma te ofrece la libertad de explorar, desde un solo lugar, la mayor variedad de marcas, modelos, sistemas de financiación y modalidades de entrega del mercado. Queremos que compares opciones de manera transparente y segura, sin distracciones y enfocándote únicamente en tu objetivo.
+                            </p>
+                            
+                            <div className="mt-8 bg-surface p-6 rounded-2xl border border-gray-100">
+                                <h3 className="text-xl font-bold text-primary mb-4 border-b border-gray-200 pb-2">¿Cuál es nuestra diferencia?</h3>
+                                <ul className="space-y-4">
+                                    <li className="flex gap-3">
+                                        <div className="min-w-6 text-accent font-bold mt-1">✓</div>
+                                        <p><strong>Neutralidad:</strong> No te empujamos a una marca específica; te mostramos todas para que elijas la que realmente te apasiona.</p>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <div className="min-w-6 text-accent font-bold mt-1">✓</div>
+                                        <p><strong>Asesoría de Élite:</strong> Al consultar con nosotros, tu solicitud es derivada automáticamente al asesor mejor capacitado para esa marca y segmento, garantizando una experiencia de compra profesional y sin vueltas.</p>
+                                    </li>
+                                    <li className="flex gap-3">
+                                        <div className="min-w-6 text-accent font-bold mt-1">✓</div>
+                                        <p><strong>Eficiencia:</strong> Te ahorramos horas de traslados y charlas repetitivas, centralizando la mejor información financiera en un solo contacto.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div className="mt-8 p-6 bg-gradient-to-br from-primary to-primary-light text-white rounded-2xl shadow-lg text-center relative overflow-hidden">
+                                <p className="relative z-10 text-lg md:text-xl font-light mb-4 text-gray-100">
+                                    Nuestro propósito es simple: que cada persona que confía en nuestra red termine manejando el vehículo que siempre quiso, con la financiación que mejor le calza y la tranquilidad de haber sido asesorada por expertos.
+                                </p>
+                                <p className="relative z-10 text-2xl font-bold text-accent">
+                                    Tu búsqueda termina acá. Tu decisión empieza ahora.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Clients Slider Section */}

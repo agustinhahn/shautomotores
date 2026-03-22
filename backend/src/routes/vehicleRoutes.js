@@ -12,9 +12,9 @@ router.get('/', getVehicles); // Publicly accessible, filter by status=published
 
 // Protected routes (Specific routes first!)
 router.get('/my-vehicles', protect, getMyVehicles);
-router.post('/', protect, upload.array('images', 10), createVehicle);
+router.post('/', protect, upload.fields([{ name: 'images', maxCount: 10 }, { name: 'technical_sheet', maxCount: 1 }]), createVehicle);
 router.delete('/:id', protect, deleteVehicle);
-router.put('/:id', protect, upload.array('images', 10), updateVehicle); // Update details/status
+router.put('/:id', protect, upload.fields([{ name: 'images', maxCount: 10 }, { name: 'technical_sheet', maxCount: 1 }]), updateVehicle); // Update details/status
 
 // Generic ID route last
 router.get('/:id', getVehicleById); // Publicly accessible

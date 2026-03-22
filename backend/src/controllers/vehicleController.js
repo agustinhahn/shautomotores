@@ -37,15 +37,23 @@ const createVehicle = async (req, res) => {
             status: 'pending_approval' // Default status
         });
 
-        if (req.files && req.files.length > 0) {
-            const imagePromises = req.files.map((file, index) => {
-                return VehicleImage.create({
-                    vehicle_id: newVehicle.id,
-                    url: `/uploads/vehicles/${file.filename}`,
-                    is_main: index === 0 // First image is main
+        let technical_sheet_url = null;
+        if (req.files) {
+            if (req.files.technical_sheet && req.files.technical_sheet.length > 0) {
+                technical_sheet_url = `/uploads/vehicles/${req.files.technical_sheet[0].filename}`;
+                await newVehicle.update({ technical_sheet_url });
+            }
+
+            if (req.files.images && req.files.images.length > 0) {
+                const imagePromises = req.files.images.map((file, index) => {
+                    return VehicleImage.create({
+                        vehicle_id: newVehicle.id,
+                        url: `/uploads/vehicles/${file.filename}`,
+                        is_main: index === 0 // First image is main
+                    });
                 });
-            });
-            await Promise.all(imagePromises);
+                await Promise.all(imagePromises);
+            }
         }
 
         const vehicleWithImages = await Vehicle.findByPk(newVehicle.id, {
@@ -101,7 +109,7 @@ const getVehicles = async (req, res) => {
             where: whereClause,
             include: [
                 { model: VehicleImage, as: 'images' },
-                { model: User, as: 'seller', attributes: ['full_name', 'email'] }
+                { model: User, as: 'seller', attributes: ['id', 'full_name', 'email', 'phone', 'role'] }
             ],
             order: order
         });
@@ -118,7 +126,7 @@ const getMyVehicles = async (req, res) => {
             where: { user_id: req.user.id },
             include: [
                 { model: VehicleImage, as: 'images' },
-                { model: User, as: 'seller', attributes: ['full_name', 'email'] }
+                { model: User, as: 'seller', attributes: ['id', 'full_name', 'email', 'phone', 'role'] }
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -156,7 +164,7 @@ const getVehicleById = async (req, res) => {
         const vehicle = await Vehicle.findByPk(id, {
             include: [
                 { model: VehicleImage, as: 'images' },
-                { model: User, as: 'seller', attributes: ['full_name', 'email', 'phone'] } // Added phone if available
+                { model: User, as: 'seller', attributes: ['id', 'full_name', 'email', 'phone', 'role'] }
             ]
         });
 
@@ -221,6 +229,22 @@ const updateVehicle = async (req, res) => {
         if (sale_type) updateData.sale_type = sale_type;
         if (promotional_text !== undefined) updateData.promotional_text = promotional_text;
         if (pricing_details !== undefined) updateData.pricing_details = parsedPricingDetails;
+
+        if (req.files && req.files.technical_sheet && req.files.technical_sheet.length > 0) {
+            updateData.technical_sheet_url = `/uploads/vehicles/${req.files.technical_sheet[0].filename}`;
+        }
+        
+        // Handle new images in update if provided
+        if (req.files && req.files.images && req.files.images.length > 0) {
+             const imagePromises = req.files.images.map((file) => {
+                 return VehicleImage.create({
+                     vehicle_id: vehicle.id,
+                     url: `/uploads/vehicles/${file.filename}`,
+                     is_main: false // Append as secondary by default in update
+                 });
+             });
+             await Promise.all(imagePromises);
+        }
 
         if (status) {
              if (req.user.role === 'super_admin') {

@@ -20,9 +20,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
   const fetchMe = async (currentToken) => {
       try {
-          const res = await fetch('http://localhost:5001/api/auth/me', {
+          const res = await fetch(`${API_BASE}/auth/me`, {
               headers: {
                   'Authorization': `Bearer ${currentToken}`
               }
@@ -42,7 +44,6 @@ export const AuthProvider = ({ children }) => {
   }
 
   const login = async (email, password) => {
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -60,7 +61,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
     const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

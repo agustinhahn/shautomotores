@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secretpassword}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-metallica123}
       POSTGRES_DB: ${DB_NAME:-shautomotores_db}
     ports:
       - "5432:5432"
@@ -24,6 +24,8 @@ services:
     restart: always
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
       - DB_HOST=${DB_HOST:-db}
       - DB_PORT=${DB_PORT:-5432}
@@ -35,7 +37,7 @@ services:
     ports:
       - "${BACK_PORT:-50001}:5000"
     volumes:
-      - ./backend/uploads:/app/uploads # Volumes compartidos para imágenes
+      - ./backend/uploads:/app/uploads
     networks:
       - sh_network
 
@@ -44,7 +46,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:50001/api}
+        - VITE_API_URL=${VITE_API_URL}
     container_name: shautomotores_frontend
     restart: always
     depends_on:

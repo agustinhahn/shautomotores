@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
 import { X, MessageCircle } from 'lucide-react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mode = 'consult' }) => {
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
     const [isTradeIn, setIsTradeIn] = useState(false);
     const [contactForm, setContactForm] = useState({
         name: '',
         surname: '',
+        dni: '',
+        age: '',
+        civilStatus: '',
+        employment: '',
+        city: '',
+        preferredTime: '',
+        hasCapital: false,
         phone: '',
         dealership: '',
         vehicleCount: '',
@@ -13,8 +23,15 @@ const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mo
         brand: '',
         model: '',
         year: '',
-        mileage: ''
+        mileage: '',
+        tradeInDetails: ''
     });
+
+    const timeSlots = [];
+    for (let i = 7; i <= 21; i++) {
+        timeSlots.push(`${i}:00 a ${i}:30`);
+        timeSlots.push(`${i}:30 a ${i+1}:00`);
+    }
 
     // Reset form when modal opens/closes or vehicle changes
     useEffect(() => {
@@ -27,17 +44,29 @@ const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mo
     }, [isOpen, defaultMessage, vehicle]);
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setContactForm(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setContactForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
-    const handleWhatsAppClick = (message) => {
-        const phone = "5493416524078"; // Replace with actual number
+    const handleWhatsAppClick = (phone, message) => {
         const text = encodeURIComponent(message);
         window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
     };
 
-    const submitContact = () => {
+    const submitContact = async () => {
+        // Determine Target Phone
+        let targetPhone = "5493415810277"; // Admin default
+        
+        if (vehicle && vehicle.seller && vehicle.seller.role !== 'super_admin' && vehicle.seller.phone) {
+            // Clean up the phone string to ensure it has only numbers
+            let cleanPhone = vehicle.seller.phone.replace(/\D/g, '');
+            // Simple logic: if user entered a local number without 549, prepend it
+            if (!cleanPhone.startsWith('549') && cleanPhone.length >= 10) {
+                cleanPhone = `549${cleanPhone}`;
+            }
+            targetPhone = cleanPhone;
+        }
+
         let message = "";
 
         if (mode === 'publish') {
@@ -62,7 +91,14 @@ const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mo
 
             message += `*Datos del Cliente:*\n`;
             if (contactForm.name) message += `*Nombre:* ${contactForm.name}\n`;
-            if (contactForm.phone) message += `*Teléfono:* ${contactForm.phone}\n\n`;
+            if (contactForm.dni) message += `*DNI:* ${contactForm.dni}\n`;
+            if (contactForm.age) message += `*Edad:* ${contactForm.age}\n`;
+            if (contactForm.civilStatus) message += `*Estado Civil:* ${contactForm.civilStatus}\n`;
+            if (contactForm.employment) message += `*Situación:* ${contactForm.employment}\n`;
+            if (contactForm.city) message += `*Ciudad:* ${contactForm.city}\n`;
+            if (contactForm.phone) message += `*Teléfono:* ${contactForm.phone}\n`;
+            if (contactForm.preferredTime) message += `*Horario de contacto:* ${contactForm.preferredTime}\n`;
+            message += `*Cuenta con capital:* ${contactForm.hasCapital ? 'Sí' : 'No'}\n\n`;
             
             message += `*Mensaje:*\n${contactForm.message || "Hola, quería hacer una consulta."}\n`;
             
@@ -72,11 +108,36 @@ const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mo
                 message += `*Modelo:* ${contactForm.model || '-'}\n`;
                 message += `*Año:* ${contactForm.year || '-'}\n`;
                 message += `*Km:* ${contactForm.mileage || '-'}\n`;
+                if (contactForm.tradeInDetails) message += `*Detalles:* ${contactForm.tradeInDetails}\n`;
             }
         }
 
-        handleWhatsAppClick(message);
+        // Fire off email proxy event asynchronously. Unblocks UI.
+        try {
+            await axios.post(`${API_BASE}/leads`, { 
+                message: message,
+                vehicleId: vehicle ? vehicle.id : null,
+                sellerId: vehicle && vehicle.seller ? vehicle.seller.id : null,
+                name: contactForm.name || "Cliente Web",
+                phone: contactForm.phone || ""
+            });
+        } catch (error) {
+            console.error('Failed to register lead on backend', error);
+            // We ignore frontend crash since WhatsApp is the main goal.
+        }
+
+        handleWhatsAppClick(targetPhone, message);
         onClose();
+        
+        // Optional quick success alert
+        if (mode === 'publish') {
+            Swal.fire({
+                title: '¡Solicitud Iniciada!',
+                text: 'Te redirigiremos a WhatsApp para finalizar con un asesor.',
+                icon: 'success',
+                confirmButtonColor: '#C0A080'
+            });
+        }
     };
 
     if (!isOpen) return null;
@@ -110,11 +171,54 @@ const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mo
                         </div>
                     ) : (
                         <>
-                            <div className="space-y-4">
-                                <input type="text" name="name" value={contactForm.name} onChange={handleInputChange} placeholder="Tu Nombre" className="w-full bg-light border border-gray-200 rounded-xl p-4 text-primary focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none transition" />
-                                <input type="tel" name="phone" value={contactForm.phone} onChange={handleInputChange} placeholder="Tu Teléfono" className="w-full bg-light border border-gray-200 rounded-xl p-4 text-primary focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none transition" />
-                                <textarea rows="3" name="message" value={contactForm.message} onChange={handleInputChange} placeholder="¿En qué podemos ayudarte?" className="w-full bg-light border border-gray-200 rounded-xl p-4 text-primary focus:border-accent focus:ring-2 focus:ring-accent/10 outline-none transition resize-none"></textarea>
-                            </div>
+                            <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1 pb-4 scrollbar-hide">
+                                <input type="text" name="name" value={contactForm.name} onChange={handleInputChange} placeholder="Nombre Completo" className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                
+                                <div className="grid grid-cols-2 gap-3">
+                                    <input type="text" name="dni" value={contactForm.dni} onChange={handleInputChange} placeholder="DNI" className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                    <input type="number" name="age" value={contactForm.age} onChange={handleInputChange} placeholder="Edad" className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <select name="civilStatus" value={contactForm.civilStatus} onChange={handleInputChange} className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition">
+                                        <option value="">Estado Civil</option>
+                                        <option value="Soltero">Soltero/a</option>
+                                        <option value="Casado">Casado/a</option>
+                                        <option value="Divorciado">Divorciado/a</option>
+                                    </select>
+                                    <select name="employment" value={contactForm.employment} onChange={handleInputChange} className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition">
+                                        <option value="">Situación Laboral</option>
+                                        <option value="Monotributista">Monotributista</option>
+                                        <option value="Relación de dependencia">Relación de dependencia</option>
+                                        <option value="Recibo de sueldo garante">Recibo de sueldo garante</option>
+                                    </select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <input type="text" name="city" value={contactForm.city} onChange={handleInputChange} placeholder="Ciudad" className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                    <input type="tel" name="phone" value={contactForm.phone} onChange={handleInputChange} placeholder="Teléfono" className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                </div>
+
+                                <select name="preferredTime" value={contactForm.preferredTime} onChange={handleInputChange} className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition">
+                                    <option value="">Horario preferente de contacto</option>
+                                    {timeSlots.map(slot => (
+                                        <option key={slot} value={slot}>{slot}</option>
+                                    ))}
+                                </select>
+
+                                <div className="flex items-center gap-3 py-1">
+                                    <input 
+                                        type="checkbox" 
+                                        name="hasCapital"
+                                        id="has-capital" 
+                                        checked={contactForm.hasCapital}
+                                        onChange={handleInputChange}
+                                        className="w-4 h-4 accent-accent rounded border-gray-300 cursor-pointer" 
+                                    />
+                                    <label htmlFor="has-capital" className="text-gray-600 text-sm cursor-pointer select-none font-medium">Cuento con capital</label>
+                                </div>
+
+                                <textarea rows="2" name="message" value={contactForm.message} onChange={handleInputChange} placeholder="¿En qué podemos ayudarte?" className="w-full bg-light border border-gray-200 rounded-xl p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition resize-none"></textarea>
                             
                             <div className="flex items-center gap-3 py-2 px-1">
                                 <input 
@@ -128,13 +232,16 @@ const ContactModal = ({ isOpen, onClose, vehicle = null, defaultMessage = '', mo
                             </div>
 
                             {isTradeIn && (
-                                <div className="grid grid-cols-2 gap-4 animate-fade-in bg-light p-4 rounded-xl border border-secondary/20">
-                                    <input type="text" name="brand" value={contactForm.brand} onChange={handleInputChange} placeholder="Marca" className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
-                                    <input type="text" name="model" value={contactForm.model} onChange={handleInputChange} placeholder="Modelo" className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
-                                    <input type="number" name="year" value={contactForm.year} onChange={handleInputChange} placeholder="Año" className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
-                                    <input type="number" name="mileage" value={contactForm.mileage} onChange={handleInputChange} placeholder="Kilómetros" className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                <div className="grid grid-cols-2 gap-3 animate-fade-in bg-light p-4 rounded-xl border border-secondary/20">
+                                    <input type="text" name="brand" value={contactForm.brand} onChange={handleInputChange} placeholder="Marca" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                    <input type="text" name="model" value={contactForm.model} onChange={handleInputChange} placeholder="Modelo" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                    <input type="number" name="year" value={contactForm.year} onChange={handleInputChange} placeholder="Año" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                    <input type="number" name="mileage" value={contactForm.mileage} onChange={handleInputChange} placeholder="Kilómetros" className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition" />
+                                    <textarea name="tradeInDetails" value={contactForm.tradeInDetails} onChange={handleInputChange} placeholder="Detalles que me gustaría aclarar (por ej. reparaciones necesarias)" className="w-full col-span-2 bg-white border border-gray-200 rounded-lg p-2.5 text-sm text-primary focus:border-accent focus:ring-1 focus:ring-accent outline-none transition resize-none" rows="2"></textarea>
                                 </div>
                             )}
+
+                            </div>
                         </>
                     )}
 

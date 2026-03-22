@@ -1,0 +1,19 @@
+# ==========================================
+# CONFIGURACIÓN VPS HOSTINGER (DEBIAN 13)
+# ==========================================
+PUBLIC_IP=82.25.74.158
+VITE_API_URL=http://82.25.74.158:50001/api
+
+FRONT_PORT=51001
+BACK_PORT=50001
+
+# -- BASE DE DATOS --
+DB_USER=postgres
+DB_PASSWORD=metallica123
+DB_NAME=shautomotores_db
+DB_HOST=db
+DB_PORT=5432
+
+# -- BACKEND --
+JWT_SECRET=super_secret_jwt_key_prod_2026_shautomotores
+PORT=5000

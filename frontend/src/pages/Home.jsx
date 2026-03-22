@@ -5,6 +5,7 @@ import vehicleService from '../services/vehicleService';
 import { Car, Search, Menu, X, ChevronRight } from 'lucide-react';
 import logo from '../assets/logo.png';
 import ContactModal from '../components/ContactModal';
+import JoinTeamModal from '../components/JoinTeamModal';
 
 const Home = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -17,6 +18,7 @@ const Home = () => {
     });
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
+    const [showJoinTeamModal, setShowJoinTeamModal] = useState(false);
     const [contactMode, setContactMode] = useState('consult');
     const [isScrolled, setIsScrolled] = useState(false);
     
@@ -60,7 +62,6 @@ const Home = () => {
             
             // Tab Filters
             if (filter === 'direct') params.sale_type = 'direct';
-            if (filter === 'financed') params.sale_type = 'financed';
             
             // Search Filters
             if (searchFilters.brand) params.brand = searchFilters.brand;
@@ -87,9 +88,18 @@ const Home = () => {
     };
 
     const handleWhatsAppClick = (message) => {
-        const phone = "5493416524078"; // Replace with actual number
+        const phone = "5493415810277"; // Replace with actual number
         const text = encodeURIComponent(message);
         window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+    };
+
+    const formatSaleType = (type) => {
+        const types = {
+            'direct': 'Venta Directa',
+            'savings_plan': 'Plan de Ahorro',
+            'consignment': 'Consignación'
+        };
+        return types[type] || type;
     };
 
     return (
@@ -109,8 +119,8 @@ const Home = () => {
                             <button onClick={() => setFilter('savings')} className={`${filter === 'savings' ? 'text-accent font-bold' : 'text-gray-200'} hover:text-accent hover:scale-105 cursor-pointer transition-all duration-300 capitalize drop-shadow-sm`}>Planes de Ahorro</button>
                             <button onClick={() => setFilter('direct')} className={`${filter === 'direct' ? 'text-accent font-bold' : 'text-gray-200'} hover:text-accent hover:scale-105 cursor-pointer transition-all duration-300 capitalize drop-shadow-sm`}>Venta Directa</button>
                             <Link to="/conocenos" className="text-gray-200 hover:text-accent hover:scale-105 cursor-pointer transition-all duration-300 font-medium drop-shadow-sm">Conócenos</Link>
-                            <button onClick={() => { setContactMode('publish'); setShowContactModal(true); }} className={`px-6 py-2.5 rounded-full font-bold cursor-pointer transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 ${isScrolled ? 'bg-accent text-primary hover:bg-white' : 'bg-white/10 text-white border border-white/20 backdrop-blur-md hover:bg-accent hover:text-primary hover:border-transparent'}`}>
-                                Publicar Vehículo
+                            <button onClick={() => setShowJoinTeamModal(true)} className={`px-6 py-2.5 rounded-full font-bold cursor-pointer transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 ${isScrolled ? 'bg-accent text-primary hover:bg-white' : 'bg-white/10 text-white border border-white/20 backdrop-blur-md hover:bg-accent hover:text-primary hover:border-transparent'}`}>
+                                Unite al equipo
                             </button>
                             <Link to="/login" className="text-gray-300 hover:text-accent hover:scale-105 cursor-pointer text-sm font-medium drop-shadow-sm transition-all duration-300">Ingresar</Link>
                         </div>
@@ -132,7 +142,7 @@ const Home = () => {
                             <Link to="/conocenos" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-4 py-3 rounded-lg hover:bg-accent/10 hover:text-accent cursor-pointer text-gray-200 font-medium transition-colors">Conócenos</Link>
                             <button onClick={() => {setFilter('savings'); setIsMenuOpen(false)}} className="block w-full text-left px-4 py-3 rounded-lg hover:bg-accent/10 hover:text-accent cursor-pointer text-gray-200 font-medium transition-colors">Planes de Ahorro</button>
                             <button onClick={() => {setFilter('direct'); setIsMenuOpen(false)}} className="block w-full text-left px-4 py-3 rounded-lg hover:bg-accent/10 hover:text-accent cursor-pointer text-gray-200 font-medium transition-colors">Venta Directa</button>
-                            <button onClick={() => { setContactMode('publish'); setShowContactModal(true); setIsMenuOpen(false); }} className="block w-full text-left px-4 py-3 rounded-lg cursor-pointer bg-accent text-primary hover:bg-white font-bold mt-4 shadow-lg transition-colors">Publicar Vehículo</button>
+                            <button onClick={() => { setShowJoinTeamModal(true); setIsMenuOpen(false); }} className="block w-full text-left px-4 py-3 rounded-lg cursor-pointer bg-accent text-primary hover:bg-white font-bold mt-4 shadow-lg transition-colors">Unite al equipo</button>
                          </div>
                     </div>
                 )}
@@ -171,7 +181,7 @@ const Home = () => {
                         </span>
                     </h1>
                     <p className="text-xl md:text-2xl text-gray-100 mb-12 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-xl animate-fade-in-up animation-delay-200">
-                        La forma más premium y transparente de comprar, vender o financiar tu vehículo.
+                        La forma más rápida y transparente de comprar, vender o financiar tu vehículo.
                         Asesoramiento de nivel experto.
                     </p>
                     <div className="flex flex-col md:flex-row justify-center gap-6 animate-fade-in-up animation-delay-300">
@@ -244,7 +254,6 @@ const Home = () => {
                     {[
                         { id: 'all', label: 'Todos' },
                         { id: 'direct', label: 'Venta Directa' },
-                        { id: 'financed', label: 'Financiados' },
                         { id: 'savings', label: 'Planes de Ahorro' },
                         { id: 'used', label: 'Usados' }
                     ].map((f) => (
@@ -281,65 +290,59 @@ const Home = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {vehicles.map((vehicle) => (
-                            <div key={vehicle.id} className="group bg-surface rounded-3xl overflow-hidden border border-secondary/20 hover:border-accent/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1">
-                                {/* Image */}
+                            <div key={vehicle.id} className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-accent/40 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative flex flex-col h-full">
+                                {/* Decorator line */}
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20"></div>
+
+                                {/* Image Section */}
                                 <div className="h-64 overflow-hidden relative bg-gray-100">
                                     {vehicle.promotional_text && (
-                                        <div className="absolute top-4 right-4 z-10 bg-primary/90 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-white/10">
+                                        <div className="absolute top-4 left-4 z-10 bg-primary/95 backdrop-blur-md text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg border border-white/10 transform -rotate-1">
                                             {vehicle.promotional_text}
+                                        </div>
+                                    )}
+                                    {vehicle.sale_type && (
+                                        <div className="absolute top-4 right-4 z-10 bg-white/95 backdrop-blur-md text-primary text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wide border border-gray-100">
+                                            {formatSaleType(vehicle.sale_type)}
                                         </div>
                                     )}
                                     {vehicle.images && vehicle.images.length > 0 ? (
                                         <img 
                                             src={`${API_BASE}${vehicle.images[0].url}`} 
                                             alt={vehicle.model} 
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <Car className="text-gray-300 w-16 h-16" />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-dark/70 via-transparent to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
                                 </div>
 
-                                {/* Details */}
-                                <div className="p-6">
+                                {/* Details Section */}
+                                <div className="p-6 flex flex-col flex-1 bg-gradient-to-b from-white to-gray-50 relative z-10 -mt-6 rounded-t-3xl shadow-[0_-15px_20px_-10px_rgba(0,0,0,0.05)] border-t border-gray-100">
                                     <div className="mb-4">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="text-lg font-bold text-primary leading-tight">{vehicle.brand} {vehicle.model}</h3>
-                                            {vehicle.sale_type && (
-                                                <span className="text-[10px] px-2 py-1 bg-light text-primary border border-secondary/30 rounded-md font-bold uppercase tracking-wide">
-                                                    {vehicle.sale_type.replace(/_/g, ' ')}
-                                                </span>
-                                            )}
+                                        <h3 className="text-2xl font-black text-primary leading-none tracking-tight mb-3">
+                                            {vehicle.brand} <span className="text-accent">{vehicle.model}</span>
+                                        </h3>
+                                        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 font-bold mb-4">
+                                            <span className="bg-white px-2.5 py-1 rounded-md border border-gray-100 shadow-sm">{vehicle.year}</span>
+                                            <span className="bg-white px-2.5 py-1 rounded-md border border-gray-100 shadow-sm">{Number(vehicle.mileage).toLocaleString()} km</span>
+                                            <span className="bg-white px-2.5 py-1 rounded-md border border-gray-100 shadow-sm capitalize">{vehicle.condition === 'new' ? 'Nuevo' : 'Usado'}</span>
                                         </div>
-                                        <p className="text-sm text-gray-500 font-medium flex items-center gap-2">
-                                            {vehicle.year} <span className="w-1 h-1 rounded-full bg-secondary"></span> {Number(vehicle.mileage).toLocaleString()} km
+                                    </div>
+
+                                    <div className="flex flex-col mt-auto pt-4 border-t border-gray-200/50 mb-6">
+                                        <p className="text-[11px] text-secondary uppercase tracking-widest font-black mb-1">Precio Contado</p>
+                                        <p className="text-3xl font-extrabold text-primary font-mono tracking-tighter group-hover:text-accent transition-colors duration-300">
+                                            <span className="text-gray-400 text-xl font-medium">{vehicle.currency} </span>{Number(vehicle.price).toLocaleString()}
                                         </p>
                                     </div>
-
-                                    <div className="flex justify-between items-end mb-6 pt-4 border-t border-gray-100">
-                                        <div>
-                                            <p className="text-xs text-secondary uppercase tracking-wider font-semibold mb-0.5">Precio Contado</p>
-                                            <p className="text-2xl font-bold text-primary font-mono tracking-tight">
-                                                {vehicle.currency} {Number(vehicle.price).toLocaleString()}
-                                            </p>
-                                        </div>
-                                    </div>
                                     
-                                    {/* Dynamic Pricing Preview */}
-                                    {vehicle.sale_type === 'financed' && vehicle.pricing_details?.down_payment && (
-                                        <div className="mb-6 bg-light p-4 rounded-xl border border-secondary/20">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm text-primary font-medium">Entrega Inicial</span>
-                                                <span className="text-primary font-bold">${Number(vehicle.pricing_details.down_payment).toLocaleString()}</span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <Link to={`/vehicles/${vehicle.id}`} className="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-accent hover:text-primary hover:shadow-lg hover:shadow-accent/20 transition-all duration-300 flex items-center justify-center gap-2 group/btn">
-                                        Ver Detalles <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform"/>
+                                    <Link to={`/vehicles/${vehicle.id}`} className="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-accent hover:text-primary hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 flex items-center justify-center gap-2 group/btn relative overflow-hidden">
+                                        <span className="relative z-10 flex items-center gap-2">Ver Detalles <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform"/></span>
+                                        <div className="absolute inset-0 h-full w-full border-t-[2px] border-white/20 transform scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-500"></div>
                                     </Link>
                                 </div>
                             </div>
@@ -371,6 +374,11 @@ const Home = () => {
                 isOpen={showContactModal} 
                 onClose={() => setShowContactModal(false)} 
                 mode={contactMode}
+            />
+
+            <JoinTeamModal 
+                isOpen={showJoinTeamModal}
+                onClose={() => setShowJoinTeamModal(false)}
             />
         </div>
     );

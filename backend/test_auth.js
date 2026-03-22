@@ -53,7 +53,7 @@ const runTests = async () => {
     const regData = JSON.stringify({
         full_name: 'Test Setup Admin',
         email: 'admin@shautomotores.com',
-        password: 'password123',
+        password: 'shgiovani2026',
         role: 'super_admin'
     });
 
@@ -68,7 +68,7 @@ const runTests = async () => {
              console.log('User already exists, trying login...');
              const loginData = JSON.stringify({
                 email: 'admin@shautomotores.com',
-                password: 'password123'
+                password: 'shgiovani2026'
              });
              const loginRes = await postRequest('/api/auth/login', loginData);
              console.log('Login Response:', loginRes);
